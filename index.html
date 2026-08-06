@@ -496,19 +496,19 @@
         <div class="field">
           <label>Cloud providers in use <span>(select all that apply)</span></label>
           <div class="checkbox-grid" id="providers-group">
-            <label class="check-item" onclick="toggleCheck(this)">
+            <label class="check-item" onclick="toggleCheck(event,this)">
               <input type="checkbox" value="aws" /><div class="check-dot"></div>
               <div><div class="check-label" style="color:var(--aws)">AWS</div><div class="check-sub">Amazon Web Services</div></div>
             </label>
-            <label class="check-item" onclick="toggleCheck(this)">
+            <label class="check-item" onclick="toggleCheck(event,this)">
               <input type="checkbox" value="azure" /><div class="check-dot"></div>
               <div><div class="check-label" style="color:var(--azure)">Azure</div><div class="check-sub">Microsoft Azure</div></div>
             </label>
-            <label class="check-item" onclick="toggleCheck(this)">
+            <label class="check-item" onclick="toggleCheck(event,this)">
               <input type="checkbox" value="gcp" /><div class="check-dot"></div>
               <div><div class="check-label" style="color:var(--gcp)">GCP</div><div class="check-sub">Google Cloud</div></div>
             </label>
-            <label class="check-item" onclick="toggleCheck(this)">
+            <label class="check-item" onclick="toggleCheck(event,this)">
               <input type="checkbox" value="other" /><div class="check-dot"></div>
               <div><div class="check-label">Other</div><div class="check-sub">Oracle, IBM, etc.</div></div>
             </label>
@@ -679,7 +679,8 @@
       el.classList.add('selected');
       el.querySelector('input').checked = true;
     }
-    function toggleCheck(el) {
+    function toggleCheck(e, el) {
+      e.preventDefault();
       el.classList.toggle('selected');
       el.querySelector('input').checked = el.classList.contains('selected');
     }
