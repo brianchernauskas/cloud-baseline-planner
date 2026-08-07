@@ -626,6 +626,7 @@
     <!-- STEP 4: RESULTS -->
     <div class="section" id="section-4">
       <div id="results-content"></div>
+      <div id="params-used-line" style="font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:24px;line-height:1.6;"></div>
       <div class="print-row">
         <button class="btn-print" onclick="window.print()">⎙ Print / Export PDF</button>
         <button class="btn btn-secondary" onclick="next(0); goTo(1)">← Start Over</button>
@@ -1025,6 +1026,18 @@
           </div>
         </div>
       `;
+
+      // Parameter provenance line
+      const isCustom = !!localStorage.getItem('proxima-baseline-config');
+      const savingsSummary = providers.map(p => {
+        const sr = cfg.savings[p] || cfg.savings.other;
+        return `${PROVIDER_META[p].label} ${sr.lo}–${sr.hi}%`;
+      }).join(', ');
+      document.getElementById('params-used-line').innerHTML =
+        `<strong>Parameters:</strong> ${isCustom ? 'Custom (modified)' : 'Default'} &nbsp;·&nbsp; ` +
+        `Base savings ranges: ${savingsSummary} &nbsp;·&nbsp; ` +
+        `Generated ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}` +
+        (isCustom ? ' &nbsp;·&nbsp; <a href="https://brianchernauskas.github.io/cloud-baseline-planner/config.html" target="_blank" style="color:var(--accent);text-decoration:none">View config →</a>' : '');
 
       goTo(4);
     }
