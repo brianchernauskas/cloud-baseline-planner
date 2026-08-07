@@ -473,7 +473,7 @@
           <div class="radio-group" id="spend-group">
             <label class="radio-row" onclick="selectRadio(this,'spend-group')">
               <input type="radio" name="spend" value="under5m" /><div class="radio-dot"></div>
-              <div class="radio-text"><strong>Under $5M</strong><span>Targeted diagnostic; limited scope</span></div>
+              <div class="radio-text"><strong>Under $5M</strong><span>Smallest spend tier</span></div>
             </label>
             <label class="radio-row" onclick="selectRadio(this,'spend-group')">
               <input type="radio" name="spend" value="5-25m" /><div class="radio-dot"></div>
@@ -778,7 +778,7 @@
       duration: { 'under5m':[3,4],'5-25m':[4,6],'25-100m':[5,8],'100-250m':[6,10],'250mplus':[7,12] },
       team: {
         'under5m':{vp:0,pc:0,sc:1,c:0,ac:1},'5-25m':{vp:0,pc:0,sc:1,c:1,ac:1},
-        '25-100m':{vp:0,pc:1,sc:1,c:1,ac:2},'100-250m':{vp:0,pc:1,sc:2,c:1,ac:2},'250mplus':{vp:1,pc:1,sc:2,c:2,ac:3}
+        '25-100m':{vp:0,pc:1,sc:1,c:1,ac:0},'100-250m':{vp:0,pc:1,sc:2,c:1,ac:0},'250mplus':{vp:1,pc:1,sc:2,c:2,ac:1}
       },
       providerMods: { p2:{sc:1,ac:1}, p3:{pcMin:1,sc:1}, p4:{sc:1,ac:1}, dur2:{lo:1,hi:2}, dur3:{lo:1,hi:2} },
       dataMods: {

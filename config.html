@@ -379,7 +379,7 @@
 
     // ─── DEFAULTS ────────────────────────────────────────────────────────────
     const SPEND_TIERS = [
-      { key:'under5m',   label:'Under $5M',     sub:'Targeted diagnostic' },
+      { key:'under5m',   label:'Under $5M',     sub:'Smallest spend tier' },
       { key:'5-25m',     label:'$5M – $25M',    sub:'Standard baseline' },
       { key:'25-100m',   label:'$25M – $100M',  sub:'Mid-market' },
       { key:'100-250m',  label:'$100M – $250M', sub:'Enterprise' },
@@ -394,9 +394,9 @@
       team: {
         'under5m':  {vp:0,pc:0,sc:1,c:0,ac:1},
         '5-25m':    {vp:0,pc:0,sc:1,c:1,ac:1},
-        '25-100m':  {vp:0,pc:1,sc:1,c:1,ac:2},
-        '100-250m': {vp:0,pc:1,sc:2,c:1,ac:2},
-        '250mplus': {vp:1,pc:1,sc:2,c:2,ac:3},
+        '25-100m':  {vp:0,pc:1,sc:1,c:1,ac:0},
+        '100-250m': {vp:0,pc:1,sc:2,c:1,ac:0},
+        '250mplus': {vp:1,pc:1,sc:2,c:2,ac:1},
       },
       providerMods: {
         p2: {sc:1,ac:1}, p3: {pcMin:1,sc:1}, p4: {sc:1,ac:1},
