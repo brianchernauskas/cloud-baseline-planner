@@ -1033,9 +1033,20 @@
         const sr = cfg.savings[p] || cfg.savings.other;
         return `${PROVIDER_META[p].label} ${sr.lo}–${sr.hi}%`;
       }).join(', ');
+      const baseTeam = cfg.team[spend];
+      const roleParts = [
+        baseTeam.vp  ? `${baseTeam.vp} VP`   : null,
+        baseTeam.pc  ? `${baseTeam.pc} PCon`  : null,
+        baseTeam.sc  ? `${baseTeam.sc} SCon`  : null,
+        baseTeam.c   ? `${baseTeam.c} Con`    : null,
+        baseTeam.ac  ? `${baseTeam.ac} ACon`  : null,
+      ].filter(Boolean).join(', ');
+      const durBase = cfg.duration[spend];
       document.getElementById('params-used-line').innerHTML =
-        `<strong>Parameters:</strong> ${isCustom ? 'Custom (modified)' : 'Default'} &nbsp;·&nbsp; ` +
-        `Base savings ranges: ${savingsSummary} &nbsp;·&nbsp; ` +
+        `<strong>Parameters (${isCustom ? 'custom' : 'default'}):</strong> &nbsp;` +
+        `Base team for ${SPEND_LABEL[spend]}: ${roleParts} &nbsp;·&nbsp; ` +
+        `Base duration: ${durBase[0]}–${durBase[1]} wks &nbsp;·&nbsp; ` +
+        `Savings ranges: ${savingsSummary} &nbsp;·&nbsp; ` +
         `Generated ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}` +
         (isCustom ? ' &nbsp;·&nbsp; <a href="https://brianchernauskas.github.io/cloud-baseline-planner/config.html" target="_blank" style="color:var(--accent);text-decoration:none">View config →</a>' : '');
 
