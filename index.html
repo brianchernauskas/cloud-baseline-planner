@@ -432,6 +432,7 @@
         <div class="header-sub">SKU 1 · Control / Diagnostic</div>
       </div>
     </div>
+    <a href="https://brianchernauskas.github.io/cloud-baseline-planner/config.html" style="font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:5px 12px;border-radius:6px;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">⚙ Configure</a>
   </header>
 
   <div class="container">
@@ -772,15 +773,24 @@
 
     // ─── CALCULATION ENGINE ──────────────────────────────────────────────────
 
-    // Savings ranges by provider (% of spend)
-    const SAVINGS_RANGES = {
-      aws:   { base: [3, 8],  label: 'AWS' },
-      azure: { base: [4, 12], label: 'Azure' },
-      gcp:   { base: [3, 7],  label: 'GCP' },
-      other: { base: [2, 5],  label: 'Other' },
+    const DEFAULTS = {
+      duration: { 'under5m':[3,4],'5-25m':[4,6],'25-100m':[5,8],'100-250m':[6,10],'250mplus':[7,12] },
+      team: {
+        'under5m':{vp:0,pc:0,sc:1,c:0,ac:1},'5-25m':{vp:0,pc:0,sc:1,c:1,ac:1},
+        '25-100m':{vp:0,pc:1,sc:1,c:1,ac:2},'100-250m':{vp:0,pc:1,sc:2,c:1,ac:2},'250mplus':{vp:1,pc:1,sc:2,c:2,ac:3}
+      },
+      providerMods: { p2:{sc:1,ac:1}, p3:{pcMin:1,sc:1}, p4:{sc:1,ac:1}, dur2:{lo:1,hi:2}, dur3:{lo:1,hi:2} },
+      dataMods: {
+        ap:{p:{lo:0,hi:1},n:{lo:1,hi:2}}, con:{p:{lo:0,hi:1},n:{lo:1,hi:2}}, sh:{p:{lo:0,hi:1},n:{lo:1,hi:1}}
+      },
+      savings: { aws:{lo:3,hi:8}, azure:{lo:4,hi:12}, gcp:{lo:3,hi:7}, other:{lo:2,hi:5} }
     };
 
-    // Modifiers to savings range
+    function getCfg() {
+      try { return JSON.parse(localStorage.getItem('proxima-baseline-config')) || DEFAULTS; }
+      catch { return DEFAULTS; }
+    }
+
     function getSavingsModifier(neg, ri) {
       let loMod = 0, hiMod = 0;
       if (neg === 'under12m') { loMod -= 1; hiMod -= 2; }
@@ -791,48 +801,31 @@
       return [loMod, hiMod];
     }
 
-    // Spend midpoint for $ calc
-    const SPEND_MID = {
-      'under5m': 3, '5-25m': 15, '25-100m': 60,
-      '100-250m': 175, '250mplus': 350
-    };
-    const SPEND_LABEL = {
-      'under5m': '<$5M', '5-25m': '$5–25M', '25-100m': '$25–100M',
-      '100-250m': '$100–250M', '250mplus': '$250M+'
-    };
+    const SPEND_MID = { 'under5m':3,'5-25m':15,'25-100m':60,'100-250m':175,'250mplus':350 };
+    const SPEND_LABEL = { 'under5m':'<$5M','5-25m':'$5–25M','25-100m':'$25–100M','100-250m':'$100–250M','250mplus':'$250M+' };
 
-    // Team sizing matrix
     function calcTeam(spend, providerCount) {
-      const tiers = {
-        'under5m':   { vp: 0, pc: 0, sc: 1, c: 0, ac: 1 },
-        '5-25m':     { vp: 0, pc: 0, sc: 1, c: 1, ac: 1 },
-        '25-100m':   { vp: 0, pc: 1, sc: 1, c: 1, ac: 2 },
-        '100-250m':  { vp: 0, pc: 1, sc: 2, c: 1, ac: 2 },
-        '250mplus':  { vp: 1, pc: 1, sc: 2, c: 2, ac: 3 },
-      };
-      const base = { ...tiers[spend] };
-      // Each additional provider beyond 1 adds workstream complexity
-      if (providerCount >= 2) { base.sc += 1; base.ac += 1; }
-      if (providerCount >= 3) { base.pc = Math.max(base.pc, 1); base.sc += 1; }
-      if (providerCount >= 4) { base.sc += 1; base.ac += 1; }
+      const cfg = getCfg();
+      const base = { ...cfg.team[spend] };
+      const m = cfg.providerMods;
+      if (providerCount >= 2) { base.sc += m.p2.sc; base.ac += m.p2.ac; }
+      if (providerCount >= 3) { base.pc = Math.max(base.pc, m.p3.pcMin); base.sc += m.p3.sc; }
+      if (providerCount >= 4) { base.sc += m.p4.sc; base.ac += m.p4.ac; }
       return base;
     }
 
-    // Duration calculation (weeks)
     function calcDuration(spend, providerCount, apData, contracts, stakeholders) {
-      const baseLo = { 'under5m':3,'5-25m':4,'25-100m':5,'100-250m':6,'250mplus':7 };
-      const baseHi = { 'under5m':4,'5-25m':6,'25-100m':8,'100-250m':10,'250mplus':12 };
-      let lo = baseLo[spend], hi = baseHi[spend];
-      // Provider count
-      if (providerCount >= 2) { lo += 1; hi += 2; }
-      if (providerCount >= 3) { lo += 1; hi += 2; }
-      // Data gaps
-      if (apData === 'partial') { hi += 1; }
-      if (apData === 'no')      { lo += 1; hi += 2; }
-      if (contracts === 'partial') { hi += 1; }
-      if (contracts === 'no')      { lo += 1; hi += 2; }
-      if (stakeholders === 'partial') { hi += 1; }
-      if (stakeholders === 'no')      { lo += 1; hi += 1; }
+      const cfg = getCfg();
+      let [lo, hi] = cfg.duration[spend];
+      const m = cfg.providerMods; const d = cfg.dataMods;
+      if (providerCount >= 2) { lo += m.dur2.lo; hi += m.dur2.hi; }
+      if (providerCount >= 3) { lo += m.dur3.lo; hi += m.dur3.hi; }
+      if (apData === 'partial')      { lo += d.ap.p.lo;  hi += d.ap.p.hi; }
+      if (apData === 'no')           { lo += d.ap.n.lo;  hi += d.ap.n.hi; }
+      if (contracts === 'partial')   { lo += d.con.p.lo; hi += d.con.p.hi; }
+      if (contracts === 'no')        { lo += d.con.n.lo; hi += d.con.n.hi; }
+      if (stakeholders === 'partial'){ lo += d.sh.p.lo;  hi += d.sh.p.hi; }
+      if (stakeholders === 'no')     { lo += d.sh.n.lo;  hi += d.sh.n.hi; }
       return [lo, hi];
     }
 
@@ -878,14 +871,15 @@
       const flags = buildFlags(apData, contracts, stakeholders);
 
       // Savings by provider
+      const cfg = getCfg();
       let totalLoM = 0, totalHiM = 0;
       const savingsRows = providers.map(p => {
-        const sr = SAVINGS_RANGES[p] || SAVINGS_RANGES.other;
+        const sr = cfg.savings[p] || cfg.savings.other;
         const neg = getRadio('neg-' + p) || '12-24m';
         const ri  = getRadio('ri-' + p)  || 'partial';
         const [lm, hm] = getSavingsModifier(neg, ri);
-        const lo = Math.max(1, sr.base[0] + lm);
-        const hi = Math.min(25, sr.base[1] + hm);
+        const lo = Math.max(1, sr.lo + lm);
+        const hi = Math.min(30, sr.hi + hm);
         const loM = (spendMid * lo / 100) / providerCount;
         const hiM = (spendMid * hi / 100) / providerCount;
         totalLoM += loM; totalHiM += hiM;
